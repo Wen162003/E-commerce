@@ -3,7 +3,7 @@ import { API_URL } from "../utils/constants";
 export async function registerApi(formData) {
   try {
     // endpoint que usa strappi
-    const url = `${API_URL}/auth/local/register`;
+    const url = `${API_URL}/api/auth/local/register`;
     const params = {
       method: "POST",
       headers: {
@@ -23,7 +23,11 @@ export async function registerApi(formData) {
 
 export async function loginApi(formData) {
   try {
-    const url = `${API_URL}/auth/local`;
+    console.log('Lo que llega al servicio');
+    
+    console.log(formData);
+    
+    const url = `${API_URL}/api/auth/local`;
     const params = {
         method: "POST",
         headers:{ 

@@ -3,17 +3,13 @@
     <div class="ui container">
       <div class="left menu">
         <router-link class="item" to="/">
-          <img
-            class="iu small image"
-            src="../assets/logo.png"
-            alt="Ecommerce"
-          />
+          <img class="iu small image" src="../assets/logo.png" alt="Ecommerce" />
           <!-- No me sirvio pero se supone que deberia mostrar las dos categorias arriba en el nav -->
-          <!-- <template v-for="category in Categories" :key="category.id">
-            <router-link class="item " :to="category.slug">
-               {{ category.title}}
-            </router-link> -->
-          <!-- </template> -->
+          <template v-for="category in Categories" :key="category.id">
+            <router-link class="item " :to="'/'+ category.id">
+              {{ category.attributes.title }}
+            </router-link>
+          </template> 
         </router-link>
       </div>
       <div class="rigth menu">
@@ -37,28 +33,39 @@
 </template>
 
 
- <script>
-import { getTokenApi,deleteTokenApi} from "../api/token";
-import {ref, onMounted} from "vue"
-import {getCategoriesApi} from "../api/category"
+<script>
+import { getTokenApi, deleteTokenApi } from "../api/token";
+import { ref, onMounted } from "vue"
+import CategoryService from "../api/CategoryService";
 export default {
   name: "Menu",
   setup() {
     let Categories = ref(null)
     const token = getTokenApi();
-   
+
+    // instanciando el servicio
+    const service = new CategoryService();
+
     // llegarian los datos de las categorias
-    onMounted(async() => {
-      const response = await getCategoriesApi();
-       Categories.value = response;
-      
+    onMounted(() => {
+      getcategories()
     });
-    
+
     // Cerrar sesión
     const logout = () => {
       deleteTokenApi();
       location.replace("/")
 
+    }
+
+    const getcategories =async() => {
+      try {
+        const response = await service.getCategories();
+        Categories.value = response.data;
+      } catch (error) {
+        console.error(error);
+        
+      }
     }
 
     return {
@@ -76,12 +83,18 @@ export default {
 
   .item {
     color: #fff;
+
     &:hover {
       color: #1fa1f1;
     }
   }
+  .menu{
+    display: flex;
+  }
+
   .menu.left {
     width: 50%;
+    display: flex;
     ui.image {
       width: 40%;
     }

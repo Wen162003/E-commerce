@@ -26,7 +26,7 @@ const routes = [
     component: register
   },
   {
-    // No funciona pq no me salen las cateogiras ;( =c 
+    // los dos puntos, significa que la ruta tiene un parametro
     path: '/:category',
     component: category
   }

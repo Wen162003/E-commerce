@@ -5,26 +5,14 @@
       <!-- Para validar prevent para que no se recargue la pagina -->
       <form class="ui form" @submit.prevent="login">
         <div class="field">
-          <input
-            type="text"
-            placeholder="Nombre de usuario"
-            v-model="formData.username"
-            :class="{error:formError.username}"
-          />
+          <input type="text" placeholder="Nombre de usuario" v-model="formData.identifier"
+            :class="{ error: formError.identifier }" />
         </div>
         <div class="field">
-          <input
-            type="password"
-            placeholder="contraseña"
-            v-model="formData.password"
-            :class="{error:formError.password}"
-          />
+          <input type="password" placeholder="contraseña" v-model="formData.password"
+            :class="{ error: formError.password }" />
         </div>
-        <button
-          type="submit"
-          class="ui button fluid primary"
-          :class="{ loading }"
-        >
+        <button type="submit" class="ui button fluid primary" :class="{ loading }">
           iniciar
         </button>
       </form>
@@ -36,11 +24,12 @@
 <script>
 // Importar el layout
 import { ref, onMounted } from "vue";
-import {useRoute} from "vue-router"
+import {useRouter} from "vue-router"
 import * as yup from "yup";
 import BasicLayout from "../layouts/BasicLayout.vue";
-import { loginApi } from "@/api/user";
-import { setTokenApi, getTokenApi} from "../api/token";
+import UserService from "@/api/UserService";
+import { useUserStore } from "@/store/User";
+import { useAuthStore } from "@/store/Auth";
 
 
 export default {
@@ -49,31 +38,44 @@ export default {
     BasicLayout,
   },
   setup() {
-    let formData = ref({});
+    let formData = ref({
+      identifier: '',
+      password: ''
+    });
     let formError = ref({});
     let loading = ref(false);
-    const router = useRoute();
-    const token = getTokenApi();
+    
+    const router = useRouter();
+    const service = new UserService();
+    const userStore= useUserStore();
+    const authStore= useAuthStore();
+    const token = authStore.token;
 
     onMounted(() => {
-      if (token) return router.push("/")
+      if (token !=='') return router.push("/")
     });
 
     // validando datos
     const schemaForm = yup.object().shape({
-      username: yup.string().required(true),
+      identifier: yup.string().required(true),
       password: yup.string().required(true),
     });
 
     const login = async () => {
-      formError.value= {};
+      formError.value = {};
       try {
         await schemaForm.validate(formData.value, { abortEarly: false });
         try {
           // ejecutamos la peticion
-          const response = await loginApi(formData.value);
-          if (!response?.jtw) throw "El usuario o contraseña no son validos";
-          setTokenApi(response?.jtw);
+          let data = {
+            identifier: formData.value.identifier,
+            password: formData.value.password
+          }
+          const response = await service.login(data);
+          console.log(response);
+          // setTokenApi(response?.jtw);
+          authStore.setToken(response.jwt)
+          userStore.setUser(response.user)
           router.push("/")
         } catch (error) {
           console.log(error);
@@ -97,9 +99,11 @@ export default {
 <style lang="scss" scoped>
 .login {
   text-align: center;
-  > h2 {
+
+  >h2 {
     margin: 50px 0 30px 0;
   }
+
   .ui.form {
     max-width: 300px !important;
     margin: 0 auto;

@@ -2,16 +2,15 @@
   <!-- esta renderizando los datos d un solo producto   -->
   <div class="ui card product">
     <div class="image">
-      <!-- <img :src="API_URL + product.image.url" :alt="Product.name" /> -->
+      <img :src="'http://localhost:1337'+ product.attributes.image.data[0].attributes.url" :alt="product.attributes.name" />
       <p>producto</p>
     </div>
-    <!-- <div class="contenct">
-      <div class="header">{{ product.name }}</div>
-      <div class="description">{{ product.price }}</div>
-    </div> -->
+    <div class="contenct">
+      <div class="header">{{ product.attributes.name }}</div>
+      <div class="description">${{ product.attributes.price }}</div>
+    </div>
     <div class="ui button primary">comprar</div>
   </div>
-  <!-- <p>{{ getProductsApi.name }}</p> -->
 </template>
 
 <script>
@@ -22,7 +21,8 @@ export default {
     product: Object,
   },
   setup(props) {
-    console.log(props.product);
+    console.log('estoy en product'); 
+    console.log(props.product.attributes.image.data[0].attributes.url);
 
     return {
       API_URL,
